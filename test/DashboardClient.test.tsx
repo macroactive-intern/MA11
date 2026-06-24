@@ -72,10 +72,12 @@ describe("DashboardClient", () => {
       resolvePost = res;
     });
 
-    vi.spyOn(globalThis, "fetch").mockImplementation((_input, options) => {
-      if (options?.method === "POST") return pendingPost;
-      return Promise.resolve(makeResponse(currentDashboard));
-    });
+    vi.spyOn(globalThis, "fetch").mockImplementation(
+      (_input: RequestInfo | URL, options?: RequestInit) => {
+        if (options?.method === "POST") return pendingPost;
+        return Promise.resolve(makeResponse(currentDashboard));
+      }
+    );
 
     const user = userEvent.setup();
     renderWithSWR();
@@ -120,12 +122,14 @@ describe("DashboardClient", () => {
   });
 
   it("shows an error and preserves previous data when the POST fails", async () => {
-    vi.spyOn(globalThis, "fetch").mockImplementation((_input, options) => {
-      if (options?.method === "POST") {
-        return Promise.resolve(makeResponse({ error: "server error" }, 500));
+    vi.spyOn(globalThis, "fetch").mockImplementation(
+      (_input: RequestInfo | URL, options?: RequestInit) => {
+        if (options?.method === "POST") {
+          return Promise.resolve(makeResponse({ error: "server error" }, 500));
+        }
+        return Promise.resolve(makeResponse(baseDashboard));
       }
-      return Promise.resolve(makeResponse(baseDashboard));
-    });
+    );
 
     const user = userEvent.setup();
     renderWithSWR();
